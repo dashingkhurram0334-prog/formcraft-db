@@ -124,7 +124,7 @@ async function viewSubmission(id) {
   if (!data.ok) return;
   const s = data.submission;
   const fields = [
-    ['Name', s.name], ['Father\\'s Name', s.father_name], ['CNIC', s.cnic], ['Age', s.age],
+    ['Name', s.name], ["Father's Name", s.father_name], ['CNIC', s.cnic], ['Age', s.age],
     ['Present Address', s.present_address], ['Permanent Address', s.permanent_address], ['Eye Color', s.eye_color],
     ['Company', s.company], ['Designation', s.designation], ['Employee ID', s.employee_id], ['Scale', s.scale],
     ['Joining Date', s.joining_date], ['Experience', s.experience], ['Total Service', s.total_service],
