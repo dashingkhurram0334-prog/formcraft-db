@@ -1,0 +1,12 @@
+{
+  "name": "formcraft-db",
+  "version": "1.0.0",
+  "description": "FormCraft employee form with SQLite database backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
