@@ -24,7 +24,8 @@ const db = new DatabaseSync(DB_PATH);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS submissions (
-    id TEXT PRIMARY KEY,
+    serial_number INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT UNIQUE,
     name TEXT,
     father_name TEXT,
     cnic TEXT,
@@ -134,7 +135,7 @@ const server = http.createServer(async (req, res) => {
       const f = JSON.parse((await readBody(req)).toString());
       const id = crypto.randomUUID();
       const v = (x) => (x === undefined || x === "" ? null : x);
-      db.prepare(`
+      const result = db.prepare(`
         INSERT INTO submissions (
           id, name, father_name, cnic, age, present_address, permanent_address, eye_color,
           company, designation, employee_id, scale, joining_date, experience, total_service,
@@ -147,11 +148,19 @@ const server = http.createServer(async (req, res) => {
         v(f.department), v(f.backend), v(f.hr_officer), v(f.employment_status), v(f.contact), v(f.email), v(f.remarks),
         v(f.photo_base64), v(f.signature_base64), JSON.stringify(f.document_names || [])
       );
-      return sendJSON(res, 200, { ok: true, id });
+      return sendJSON(res, 200, { ok: true, id, serial_number: Number(result.lastInsertRowid) });
     } catch (e) {
       console.error(e);
       return sendJSON(res, 400, { ok: false, error: "Could not save submission" });
     }
+  }
+
+  // ---- Public lookup by serial number (no login needed — like a receipt/token number) ----
+  if (pathname.startsWith("/api/lookup/") && req.method === "GET") {
+    const serial = pathname.split("/api/lookup/")[1];
+    const row = db.prepare("SELECT * FROM submissions WHERE serial_number = ?").get(serial);
+    if (!row) return sendJSON(res, 404, { ok: false, error: "No record found with that number" });
+    return sendJSON(res, 200, { ok: true, submission: row });
   }
 
   // ---- Admin login ----
@@ -216,3 +225,4 @@ server.listen(PORT, () => {
   console.log(`FormCraft server running: http://localhost:${PORT}`);
   console.log(`Admin panel: http://localhost:${PORT}/admin  (username: admin, PIN: 1234)`);
 });
+                
